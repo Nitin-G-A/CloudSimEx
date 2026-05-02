@@ -27,14 +27,14 @@ if errorlevel 1 (
 echo.
 echo ==========================================
 echo   SUCCESS! JAR built at:
-echo   simulation\target\cloud-simulation-1.0-shaded.jar
+echo   simulation\target\cloud-simulation-1.0.jar
 echo ==========================================
 echo.
 echo Testing with default config (3 VMs, 10 Cloudlets)...
 echo.
 
 mkdir ..\simulation\output 2>nul
-java -jar target\cloud-simulation-1.0-shaded.jar 3 10 1000 2048 1000 10000 TimeShared ..\simulation\output\results.csv
+java -jar target\cloud-simulation-1.0.jar 3 10 1000 2048 1000 10000 TimeShared ..\simulation\output\results.csv
 
 echo.
 echo If you see a table above with cloudlet results, Phase 2 is COMPLETE!

@@ -23,80 +23,119 @@ CloudSimEx/
 └── test_simulation.bat                 ← Script to run manual test scenarios
 ```
 
-## Prerequisites
+> A user-friendly web platform for cloud environment simulation, built on top of the CloudSim Express research framework.
 
-To run this project locally, you will need:
-1. **Java Development Kit (JDK) 11+**
-2. **Apache Maven** (for building the Java simulation)
-3. **Python 3.8+** (for the Flask backend)
-4. **Node.js & npm** (for the React frontend)
+---
 
-## How to Build & Run
+##  Project Overview
 
-### 1. Build the Simulation Engine
-First, compile the Java simulation code into an executable JAR file.
-Open a terminal in the project root and run:
-```powershell
-.\build.bat
+This project adds a **missing user-friendly web layer** to the CloudSim Express research framework. The original research paper proposes a script-based cloud simulation architecture but lacks an interactive interface. This project bridges that gap by building:
+
+-  **React Frontend** — Config forms, sliders, real-time results with charts
+-  **Python Flask Backend** — REST API bridge between UI and Java simulation
+-  **Java Simulation Core** — CloudSim Plus 5.4.3 engine producing CSV output
+
+---
+
+##  Architecture
+
 ```
-*(This will use Maven to download CloudSim Plus dependencies and package the `.jar` into `simulation/target/cloud-simulation-1.0.jar`)*
-
-### 2. Start the Backend API
-Start the Flask server which bridges the React app and the Java simulation.
-```powershell
-.\start_backend.bat
+User (Browser)
+    ↓  fills config form
+React Frontend (port 3000)
+    ↓  POST /simulate
+Python Flask API (port 5000)
+    ↓  java -jar simulation.jar args...
+Java CloudSim Engine
+    ↓  writes results.csv
+Flask API
+    ↓  parses CSV → JSON
+React Frontend
+    ↓  renders charts + table
 ```
-*(The API will run at `http://localhost:5000`)*
 
-### 3. Start the Frontend Web App
-Start the React development server.
-```powershell
-.\start_frontend.bat
-```
-*(The web UI will be accessible at `http://localhost:3000`)*
+---
 
-## Running the Simulation Manually (CLI)
+##  Tech Stack
 
-If you wish to bypass the web interface and run the simulation directly from the command line:
+| Layer | Technology |
+|-------|-----------|
+| Simulation Core | Java 11, CloudSim Plus 5.4.3, Maven |
+| Backend API | Python 3, Flask, flask-cors |
+| Frontend | React 18, Recharts, Axios |
+| Build | Maven Shade Plugin (fat JAR) |
 
+---
+
+##  How to Run
+
+### Prerequisites
+- Java JDK 11 (Microsoft OpenJDK 11)
+- Maven 3.9+
+- Python 3.10+
+- Node.js 18+
+
+### Step 1 — Build Java simulation
 ```powershell
 cd simulation
-java -jar target\cloud-simulation-1.0.jar <numVMs> <numCloudlets> <mips> <ram> <bw> <cloudletLength> <schedulingPolicy> <outputPath>
+mvn package -DskipTests
 ```
 
-### Example Usage:
+### Step 2 — Start everything
 ```powershell
-java -jar target\cloud-simulation-1.0.jar 3 10 1000 2048 1000 10000 TimeShared output\results.csv
+.\start_all.bat
 ```
 
-## Configurable Parameters
+This opens two terminals:
+- Backend: http://localhost:5000
+- Frontend: http://localhost:3000
 
-| # | Parameter | Example | Meaning |
-|---|-----------|---------|---------|
-| 1 | numVMs | 3 | Number of Virtual Machines |
-| 2 | numCloudlets | 10 | Number of tasks/jobs |
-| 3 | mips | 1000 | Processing speed per VM (Million Instructions/sec) |
-| 4 | ram | 2048 | RAM per VM in MB |
-| 5 | bw | 1000 | Bandwidth per VM in Mbps |
-| 6 | cloudletLength | 10000 | Task size in Million Instructions |
-| 7 | schedulingPolicy | TimeShared | TimeShared or SpaceShared |
-| 8 | outputPath | output/results.csv | Where to save CSV results |
+---
 
-## Output Format
+##  Features
 
-The simulation generates tabular data detailing the execution of cloudlets (tasks).
+- **Config Panel** — Sliders for VMs, Cloudlets, MIPS, RAM, Bandwidth
+- **Quick Presets** — 4 preset configurations (Small/Medium/Large/SpaceShared)
+- **Real Simulation** — Runs actual Java CloudSim engine, not mock data
+- **3 Result Views** — Bar chart, Timeline, Data table
+- **Export CSV** — Download simulation results as CSV
+- **Backend Status** — Live indicator showing if backend is online
+- **Error Handling** — Friendly messages if backend is offline
 
-```csv
-cloudlet_id,vm_id,status,exec_time,start_time,finish_time,length,cpu_cores
-0,0,SUCCESS,10.0000,0.1000,10.1000,10000,2
-1,1,SUCCESS,9.5000,0.1000,9.6000,9500,2
-...
-```
+---
 
-## How It Works
+##  Simulation Parameters
 
-1. Users configure Data Center, Virtual Machine (VM), and Cloudlet (task) parameters via the **React Frontend**.
-2. The frontend sends these parameters as a JSON payload to the **Flask Backend**.
-3. Flask launches a subprocess executing the `cloud-simulation-1.0.jar` with the provided arguments.
-4. **CloudSim Plus (Java)** executes the simulation, mapping cloudlets to VMs using the specified scheduling policy (e.g., SpaceShared or TimeShared), and outputs the results to a structured CSV file.
-5. Flask reads the generated CSV and returns the execution data back to the React app to be charted and displayed.
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| Virtual Machines | 1–10 | Number of VMs in the datacenter |
+| Cloudlets | 1–30 | Number of tasks to execute |
+| MIPS/VM | 100–10000 | Processing speed per VM |
+| RAM/VM | 512–16384 MB | Memory per VM |
+| Bandwidth | 100–10000 Mbps | Network bandwidth per VM |
+| Task Length | 1000–100000 MI | Computational size of each task |
+| Scheduling | TimeShared / SpaceShared | VM scheduling policy |
+
+---
+
+##  Research Reference
+
+This project is based on:
+
+> Hewage, T. B., Ilager, S., Rodriguez, M. A., & Buyya, R. (2024).
+> **CloudSim Express: A novel framework for rapid low code simulation of cloud computing environments.**
+> *Software: Practice and Experience*, 54(3), 483–500.
+> DOI: 10.1002/spe.3290
+
+GitHub: https://github.com/Cloudslab/cloudsim-express
+
+---
+
+##  Novel Contribution
+
+The original CloudSim Express paper provides a YAML-based CLI simulation tool. This project contributes a **complete web layer** that was explicitly listed as future work in the paper:
+
+> *"we intend to develop a graphical user interface using the System Model Script"*
+> — Hewage et al., 2024 (Section 7, Future Work)
+
+This project directly implements that vision.

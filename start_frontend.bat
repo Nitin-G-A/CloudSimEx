@@ -16,4 +16,5 @@ echo   Backend must be running on: http://localhost:5000
 echo   Press Ctrl+C to stop
 echo.
 
+set ALLOWED_HOSTS=all
 npm start
